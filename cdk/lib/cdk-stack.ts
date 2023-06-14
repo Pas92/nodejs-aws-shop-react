@@ -10,17 +10,29 @@ export class CdkStack extends cdk.Stack {
     super(scope, id, props);
 
     const shopBucket = new s3.Bucket(this, 'RssShopBucket', {
+      bucketName: 'shop-bucket',
+      websiteIndexDocument: 'index.html',
+      publicReadAccess: true,
       versioned: true,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
       autoDeleteObjects: true,
-      websiteIndexDocument: 'index.html',
-      publicReadAccess: true,
-      blockPublicAccess: s3.BlockPublicAccess.BLOCK_ACLS,
+      accessControl: s3.BucketAccessControl.PUBLIC_READ_WRITE,
+      // objectOwnership: s3.ObjectOwnership.BUCKET_OWNER_ENFORCED,
     });
 
-    new s3deploy.BucketDeployment(this, 'DeployWebsite', {
-      sources: [s3deploy.Source.asset(path.resolve(__dirname, '../dist'))],
-      destinationBucket: shopBucket,
+    shopBucket.grantRead(new iam.AccountRootPrincipal());
+
+    //TODO: Add cloudfront distribution
+    // new s3deploy.BucketDeployment(this, 'DeployWebsite', {
+    //   sources: [
+    //     s3deploy.Source.asset(path.resolve(__dirname, '../../dist'), {}),
+    //   ],
+    //   destinationBucket: shopBucket,
+    // });
+
+    new cdk.CfnOutput(this, 'BucketDomain', {
+      value: shopBucket.bucketWebsiteUrl,
+      exportName: 'DeploymentBucket',
     });
   }
 }

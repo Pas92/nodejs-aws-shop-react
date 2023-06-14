@@ -8,7 +8,14 @@
     "build": "tsc",
     "watch": "tsc -w",
     "test": "jest",
-    "cdk": "cdk"
+    "cdk": "cdk",
+    "cdk:first-build": "cdklocal bootstrap && npm run build && cdklocal synth && cdklocal deploy",
+    "cdk:build": "npm run build && cdklocal synth && cdklocal deploy",
+    "bucket:website": "awslocal s3 website s3://shop-bucket/ --index-document index.html",
+    "fe:deploy": "cd .. && cd dist && awslocal s3 cp . s3://shop-bucket --recursive",
+    "iam:lambda-role": "awslocal iam create-role --role-name lambda-ex --assume-role-policy-document file://trust-policy.json",
+    "lambda:list": "awslocal lambda list-functions --max-items 10",
+    "lambda:unzip-deploy": "awslocal lambda invoke --function-name CdkStack-CustomCDKBucketDeploymen-be635b49 out --log-type Tail"
   },
   "devDependencies": {
     "@types/jest": "^29.5.1",

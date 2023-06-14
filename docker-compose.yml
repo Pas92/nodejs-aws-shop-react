@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  localstack:
+    network_mode: bridge
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: localstack-example
+    hostname: localstack
+    ports:
+      - '53:53'
+      - '443:443'
+      - '4510-4520:4510-4520'
+      - '4566-4620:4566-4620'
+      - '${PORT_WEB_UI-8080}:${PORT_WEB_UI-8080}'
+    environment:
+      # Declare which aws services will be used in localstack
+      - SERVICES=sqs,sns,iam,s3,lambda,cloudformation
+      - DEBUG=1
+      # These variables are needed for localstack
+      - DOCKER_HOST=unix:///var/run/docker.sock
+      - DATA_DIR=/tmp/localstack/data
+      - EDGE_PORT=4566
+      - LOCALSTACK_HOSTNAME=localhost
+      - LAMBDA_NETWORK=bridge
+      - HOSTNAME_EXTERNAL=localstack
+      - LAMBDA_EXECUTOR=docker-reuse
+      - LAMBDA_IGNORE_ARCHITECTURE=1
+      - LAMBDA_KEEPALIVE_MS=0
+      - LAMBDA_RUNTIME_ENVIRONMENT_TIMEOUT=600
+      - DISABLE_CORS_CHECKS=1
+    volumes:
+      - '${TMPDIR:-/tmp}/localstack:/tmp/localstack'
+      - /var/run/docker.sock:/var/run/docker.sock
